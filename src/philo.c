@@ -12,15 +12,21 @@
 
 # include "../inc/philo.h"
 
-struct s_data
+/////creating threads
+void create_threads(t_data *data)
 {
-    int philo_count;
-    int time_to_die;
-    int time_to_eat;
-    int time_to_sleep;
-    int meal_count;
-} t_data;
+    int i;
 
+    i = 0;
+    while (i < data->philo_count)
+    {
+        if (pthread_create(&data->philos[i].thread, NULL, NULL, &data->philos[i]))
+            return (printf("Error: Thread creation failed\n")); //add free function
+        i++;
+    }
+}
+
+/////input parsing
 int ft_atoi(const char *str)
 {
     int i;
@@ -73,17 +79,26 @@ int check_input(int argc, char **argv)
 
 int parse_input(int argc, char **argv)
 {
-    t_data.philo_count = ft_atoi(argv[1]);
-    t_data.time_to_die = ft_atoi(argv[2]);
-    t_data.time_to_eat = ft_atoi(argv[3]);
-    t_data.time_to_sleep = ft_atoi(argv[4]);
+    t_data *data;
+
+    data->philo_count = ft_atoi(argv[1]);
+    data->time_to_die = ft_atoi(argv[2]);
+    data->time_to_eat = ft_atoi(argv[3]);
+    data->time_to_sleep = ft_atoi(argv[4]);
     if (argc == 6)
-        t_data.meal_count = ft_atoi(argv[5]);
+        data->meal_count = ft_atoi(argv[5]);
     else
-        t_data.meal_count = -1;
-    if (t_data.philo_count < 1 || t_data.time_to_die < 1 || t_data.time_to_eat < 1
-        || t_data.time_to_sleep < 1 || (argc == 6 && t_data.meal_count < 1))
+        data->meal_count = -1;
+    if (data->philo_count < 1 || data->time_to_die < 1 || data->time_to_eat < 1
+        || data->time_to_sleep < 1 || (argc == 6 && data->meal_count < 1))
         return (printf("Error: Invalid argument\n"), 1);
+    data->philos = malloc(sizeof(t_philo) * data->philo_count);
+    if (!data->philos)
+        return (printf("Error: Malloc failed\n"), 1);
+    data->forks = malloc(sizeof(pthread_mutex_t) * data->philo_count);
+    if (!data->forks)
+        return (printf("Error: Malloc failed\n"), 1);
+    data->start_time = ft_get_time();
     return (0);
 }
 

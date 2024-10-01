@@ -102,6 +102,5 @@ clean :
 
 fclean : clean
 	@$(RM) $(NAME)
-	@$(RM) -rf $(MLX42_DIR)
 
 re : clean fclean all

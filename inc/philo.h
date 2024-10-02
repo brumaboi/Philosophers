@@ -24,9 +24,14 @@
 typedef struct s_philo
 {
     int id;
+    int left_fork;
+    int right_fork;
+    int meals;
+    long last_meal;
     pthread_t thread;
     pthread_t dead_checker;
     pthread_mutex_t mutex;
+    struct s_data *data;
 } t_philo;
 
 typedef struct s_data
@@ -40,7 +45,11 @@ typedef struct s_data
     int death;
     int full;
     long start_time;
-    pthread_mutex_t forks;
+    pthread_mutex_t *forks;
+    pthread_mutex_t print;
+    pthread_mutex_t dead_mutex;
+    pthread_mutex_t full_mutex;
+    pthread_mutex_t ready_mutex;
 } t_data;
 
 ////// FUNCTIONS //////

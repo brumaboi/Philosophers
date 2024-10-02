@@ -12,7 +12,16 @@
 
 # include "../inc/philo.h"
 
-/////creating threads
+void *routine(void *arg)
+{
+    t_philo *philo;
+    t_data *data;
+
+    philo = (t_philo *)arg;
+    data =  philo->data;
+    //// add routine
+}
+
 void create_threads(t_data *data)
 {
     int i;
@@ -20,13 +29,19 @@ void create_threads(t_data *data)
     i = 0;
     while (i < data->philo_count)
     {
-        if (pthread_create(&data->philos[i].thread, NULL, NULL, &data->philos[i]))
+        if (pthread_create(&data->philos[i].thread, NULL, routine, &data->philos[i]))
             return (printf("Error: Thread creation failed\n")); //add free function
+        i++;
+    }
+    i = 0;
+    while (i < data->philo_count)
+    {
+        if (pthread_join(data->philos[i].thread, NULL))
+            return (printf("Error: Thread join failed\n")); //add free function
         i++;
     }
 }
 
-/////input parsing
 int ft_atoi(const char *str)
 {
     int i;
@@ -58,9 +73,9 @@ int check_input(int argc, char **argv)
     int i;
     int j;
 
-    if (argc > 5 && argc < 6)
+    if (argc < 5 || argc > 6)
         return (printf("Error: Wrong number of arguments\n"), 1);
-    i = 0;
+    i = 1;
     while(i < argc)
     {
         j = 0;
@@ -77,10 +92,8 @@ int check_input(int argc, char **argv)
     return (0);
 }
 
-int parse_input(int argc, char **argv)
+int parse_input(t_data *data, int argc, char **argv)
 {
-    t_data *data;
-
     data->philo_count = ft_atoi(argv[1]);
     data->time_to_die = ft_atoi(argv[2]);
     data->time_to_eat = ft_atoi(argv[3]);
@@ -98,21 +111,77 @@ int parse_input(int argc, char **argv)
     data->forks = malloc(sizeof(pthread_mutex_t) * data->philo_count);
     if (!data->forks)
         return (printf("Error: Malloc failed\n"), 1);
+    if (init_mutex(data) == 1)
+        return (printf("Error: Mutex init failed\n"), 1);
     data->start_time = ft_get_time();
+    if (init_philos(data) == 1)
+        return (printf("Error: Philo init failed\n"), 1);
     return (0);
 }
 
-int check_parse_input(int argc, char **argv)
+int init_mutex(t_data *data)
+{
+    int i;
+
+    i = 0;
+    if (pthread_mutex_init(&data->print, NULL) != 0)
+        return (1);
+    if (pthread_mutex_init(&data->dead_mutex, NULL) != 0)
+        return (1);
+    if (pthread_mutex_init(&data->full_mutex, NULL) != 0)
+        return (1);
+    if (pthread_mutex_init(&data->ready_mutex, NULL) != 0)
+        return (1);
+    while (i < data->philo_count)
+    {
+        if (pthread_mutex_init(&data->philos[i].mutex, NULL))
+            return (1);
+        if (pthread_mutex_init(&data->forks[i], NULL) != 0)
+            return (1);
+        i++;
+    }
+    return (0);
+}
+
+int init_philos(t_data *data)
+{
+    int i;
+
+    i = 0;
+    while (i < data->philo_count)
+    {
+        data->philos[i].id = i;
+        data->philos[i].left_fork = i;
+        data->philos[i].right_fork = (i + 1) % data->philo_count;
+        data->philos[i].meals = 0;
+        data->philos[i].last_meal = data->start_time;
+        i++;
+    }
+    create_threads(data);
+    return (0);
+}
+
+int check_parse_input(t_data *data, int argc, char **argv)
 {
     if (check_input(argc, argv) == 1)
         return (1);
-    if (parse_input(argc, argv) == 1)
+    if (parse_input(data, argc, argv) == 1)
         return (1);
     return (0);
 }
 
 int main(int argc, char **argv)
 {
-    if (check_parse_input(argc, argv) == 1)
+    t_data *data;
+
+    data = malloc(sizeof(t_data));
+    if (!data)
+        return (printf("Error: Malloc failed\n"), 1);
+    if (check_parse_input(&data, argc, argv) == 1)
         return (1);
+    ////
+    free(data->philos);
+    free(data->forks);
+    free(data);
+    return(0);
 }

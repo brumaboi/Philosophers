@@ -12,6 +12,40 @@
 
 # include "../inc/philo.h"
 
+long long ft_get_time(void)
+{
+    struct timeval time;
+
+    gettimeofday(&time, NULL);
+    return ((time.tv_sec * 1000) + (time.tv_usec / 1000));
+}
+
+void    ft_usleep(useconds_t )
+{
+    long long start;
+    long long elapsed;
+
+    start = ft_get_time();
+    elapsed = 0;
+    while (elapsed < usec)
+    {
+        usleep(100);
+        elapsed = ft_get_time() - start;
+    }
+}
+
+int one_dead(t_data *data)
+{
+    pthread_mutex_lock(&data->dead_mutex);
+    if (data->death)
+    {
+        pthread_mutex_unlock(&data->dead_mutex);
+        return (0);
+    }
+    pthread_mutex_unlock(&data->dead_mutex);
+    return (1);
+}
+
 void *routine(void *arg)
 {
     t_philo *philo;
@@ -19,10 +53,55 @@ void *routine(void *arg)
 
     philo = (t_philo *)arg;
     data =  philo->data;
-    //// add routine
+    if (philo->id % 2 == 0)
+        ft_usleep(data->time_to_eat / 2);
+    while(one_dead(data == 1))
+    {
+        //think
+        //eat
+        //sleep
+    }
 }
 
-void create_threads(t_data *data)
+void set_death(t_data *data)
+{
+    pthread_mutex_lock(&data->dead_mutex);
+    data->death = 1;
+    pthread_mutex_unlock(&data->dead_mutex);
+}
+
+void check_philos(t_data *data)
+{
+    int i;
+
+    while(1)
+    {
+        i = 0; 
+        while (i < data->philo_count)
+        {
+            if (ft_get_time() - data->philos[i].last_meal > data->time_to_die)
+            {
+                set_death(data);
+                pthread_mutex_lock(&data->print);
+                printf("%lld %d died\n", ft_get_time() - data->start_time, data->philos[i].id + 1);
+                pthread_mutex_unlock(&data->print);
+                return ;
+            }
+            i++;
+        }
+        pthread_mutex_lock(&data->full_mutex);
+        if (data->full == data->philo_count)
+        {
+            set_death(data);
+            pthread_mutex_unlock(&data->full_mutex);
+            return ;
+        }
+        pthread_mutex_unlock(&data->full_mutex);
+        ft_usleep(100);
+    }
+}
+
+void create_philos(t_data *data)
 {
     int i;
 
@@ -30,14 +109,18 @@ void create_threads(t_data *data)
     while (i < data->philo_count)
     {
         if (pthread_create(&data->philos[i].thread, NULL, routine, &data->philos[i]))
-            return (printf("Error: Thread creation failed\n")); //add free function
+        {
+            set_death(data);
+            break ;
+        }
         i++;
     }
+    check_philos(data);
     i = 0;
     while (i < data->philo_count)
     {
         if (pthread_join(data->philos[i].thread, NULL))
-            return (printf("Error: Thread join failed\n")); //add free function
+            return (printf("Error: Thread join failed\n"));
         i++;
     }
 }
@@ -157,7 +240,7 @@ int init_philos(t_data *data)
         data->philos[i].last_meal = data->start_time;
         i++;
     }
-    create_threads(data);
+    create_philos(data);
     return (0);
 }
 

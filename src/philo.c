@@ -20,7 +20,7 @@ long long ft_get_time(void)
     return ((time.tv_sec * 1000) + (time.tv_usec / 1000));
 }
 
-void    ft_usleep(useconds_t )
+void    ft_usleep(useconds_t usec)
 {
     long long start;
     long long elapsed;
@@ -46,6 +46,16 @@ int one_dead(t_data *data)
     return (1);
 }
 
+void ft_sleep(t_philo *philo, t_data *data)
+{
+    ////
+}
+
+void ft_eat(t_philo *philo, t_data *data)
+{
+    ////
+}
+
 void *routine(void *arg)
 {
     t_philo *philo;
@@ -57,10 +67,23 @@ void *routine(void *arg)
         ft_usleep(data->time_to_eat / 2);
     while(one_dead(data == 1))
     {
-        //think
-        //eat
-        //sleep
+        print_action(data, philo, "is thinking");
+        ft_eat(philo, data);
+        ft_sleep(philo, data);
     }
+    return (NULL);
+}
+
+void print_action(t_data *data, t_philo *philo, const char *str)
+{
+    pthread_mutex_lock(&data->print);
+    if(one_dead(data) == 1)
+    {
+        pthread_mutex_unlock(&data->print);
+        return ;
+    }
+    printf("%lld %d %s\n", ft_get_time() - data->start_time, philo->id + 1, str);
+    pthread_mutex_unlock(&data->print);
 }
 
 void set_death(t_data *data)
@@ -68,6 +91,19 @@ void set_death(t_data *data)
     pthread_mutex_lock(&data->dead_mutex);
     data->death = 1;
     pthread_mutex_unlock(&data->dead_mutex);
+}
+
+int will_starve(t_philo *philo, t_data *data)
+{
+    if (ft_get_time() - philo->last_meal > data->time_to_die)
+    {
+        set_death(data);
+        pthread_mutex_lock(&data->print);
+        printf("%lld %d died\n", ft_get_time() - data->start_time, philo->id + 1);
+        pthread_mutex_unlock(&data->print);
+        return (1);
+    }
+    return (0);
 }
 
 void check_philos(t_data *data)
@@ -79,14 +115,8 @@ void check_philos(t_data *data)
         i = 0; 
         while (i < data->philo_count)
         {
-            if (ft_get_time() - data->philos[i].last_meal > data->time_to_die)
-            {
-                set_death(data);
-                pthread_mutex_lock(&data->print);
-                printf("%lld %d died\n", ft_get_time() - data->start_time, data->philos[i].id + 1);
-                pthread_mutex_unlock(&data->print);
+            if(will_starve(&data->philos[i], data) == 1)
                 return ;
-            }
             i++;
         }
         pthread_mutex_lock(&data->full_mutex);

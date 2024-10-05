@@ -17,21 +17,18 @@ long long ft_get_time(void)
     struct timeval time;
 
     gettimeofday(&time, NULL);
-    return ((time.tv_sec * 1000) + (time.tv_usec / 1000));
+    return ((time.tv_sec * 1000000) + time.tv_usec);
 }
 
 void    ft_usleep(useconds_t usec)
 {
     long long start;
-    long long elapsed;
+    long long end;
 
     start = ft_get_time();
-    elapsed = 0;
-    while (elapsed < usec)
-    {
+    end = start + usec;
+    while (ft_get_time() < end)
         usleep(100);
-        elapsed = ft_get_time() - start;
-    }
 }
 
 int one_dead(t_data *data)
@@ -40,10 +37,10 @@ int one_dead(t_data *data)
     if (data->death)
     {
         pthread_mutex_unlock(&data->dead_mutex);
-        return (0);
+        return (1);
     }
     pthread_mutex_unlock(&data->dead_mutex);
-    return (1);
+    return (0);
 }
 
 void ft_sleep(t_philo *philo, t_data *data)
@@ -67,14 +64,49 @@ int give_forks_not_dead(t_philo *philo, t_data *data)
     return (0);
 }
 
-lock_forks(t_philo *philo, t_data *data)
+void lock_forks(t_philo *philo, t_data *data)
 {
-    
+    if (philo->left_fork < philo->right_fork)
+    {
+        pthread_mutex_lock(&data->forks[philo->left_fork]);
+        print_action(data, philo, "has taken a fork");
+        pthread_mutex_lock(&data->forks[philo->right_fork]);
+        print_action(data, philo, "has taken a fork");
+    }
+    else if (philo->left_fork > philo->right_fork)
+    {
+        pthread_mutex_lock(&data->forks[philo->right_fork]);
+        print_action(data, philo, "has taken a fork");
+        pthread_mutex_lock(&data->forks[philo->left_fork]);
+        print_action(data, philo, "has taken a fork");
+    }
+    else
+    {
+        pthread_mutex_lock(&data->forks[philo->left_fork]);
+        print_action(data, philo, "has taken a fork");
+        if (one_dead(data))
+            pthread_mutex_unlock(&data->forks[philo->left_fork]);
+        else
+            ft_usleep(100);
+    }
 }
 
-unlock_forks(t_philo *philo, t_data *data)
+void unlock_forks(t_philo *philo, t_data *data)
 {
-
+    if (philo->left_fork < philo->right_fork)
+    {
+        pthread_mutex_unlock(&data->forks[philo->left_fork]);
+        pthread_mutex_unlock(&data->forks[philo->right_fork]);
+    }
+    else if (philo->left_fork > philo->right_fork)
+    {
+        pthread_mutex_unlock(&data->forks[philo->right_fork]);
+        pthread_mutex_unlock(&data->forks[philo->left_fork]);
+    }
+    else
+    {
+        pthread_mutex_unlock(&data->forks[philo->left_fork]);
+    }
 }
 
 void ft_eat(t_philo *philo, t_data *data)
@@ -327,16 +359,14 @@ int check_parse_input(t_data *data, int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-    t_data *data;
+    t_data data;
 
-    data = malloc(sizeof(t_data));
-    if (!data)
-        return (printf("Error: Malloc failed\n"), 1);
+    // data = malloc(sizeof(t_data));
+    // if (!data)
+        // return (printf("Error: Malloc failed\n"), 1);
     if (check_parse_input(&data, argc, argv) == 1)
         return (1);
-    ////
-    free(data->philos);
-    free(data->forks);
-    free(data);
+    free(data.philos);
+    free(data.forks);
     return(0);
 }

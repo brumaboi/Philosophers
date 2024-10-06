@@ -31,11 +31,12 @@ SRC_DIR			= 	src/
 OBJ_DIR			= 	obj/
 	   
 SRC 			= $(SRC_DIR)philo.c \
-				  $(SRC_DIR)action_monitor.c \
+				  $(SRC_DIR)init_philos.c \
 				  $(SRC_DIR)routine.c \
 				  $(SRC_DIR)parse_input.c \
 				  $(SRC_DIR)utils.c \
-				  $(SRC_DIR)utils2.c
+				  $(SRC_DIR)mutex.c \
+				  $(SRC_DIR)time.c
 		
 OBJ = $(patsubst $(SRC_DIR)%.c,$(OBJ_DIR)%.o,$(SRC))
 

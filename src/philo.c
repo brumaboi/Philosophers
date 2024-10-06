@@ -227,6 +227,7 @@ void create_philos(t_data *data)
         if (pthread_create(&data->philos[i].thread, NULL, routine, &data->philos[i]))
         {
             set_death(data);
+            clean_mutex(data, i);
             break ;
         }
         i++;
@@ -238,6 +239,7 @@ void create_philos(t_data *data)
         pthread_join(data->philos[i].thread, NULL);
         i++;
     }
+    clean_mutex(data, data->philo_count);
 }
 
 int ft_atoi(const char *str)
@@ -317,6 +319,25 @@ int parse_input(t_data *data, int argc, char **argv)
     return (0);
 }
 
+int clean_mutex(t_data *data, int i)
+{
+    int j;
+
+    j = 0;
+    while (j < i)
+    {
+        pthread_mutex_destroy(&data->philos[j].mutex);
+        pthread_mutex_destroy(&data->forks[j]);
+        j++;
+    }
+    pthread_mutex_destroy(&data->print);
+    pthread_mutex_destroy(&data->dead_mutex);
+    pthread_mutex_destroy(&data->full_mutex);
+    free(data->philos);
+    free(data->forks);
+    return (1);
+}
+
 int init_mutex(t_data *data)
 {
     int i;
@@ -331,9 +352,9 @@ int init_mutex(t_data *data)
     while (i < data->philo_count)
     {
         if (pthread_mutex_init(&data->philos[i].mutex, NULL))
-            return (1);
+            return (clean_mutex(data, i));
         if (pthread_mutex_init(&data->forks[i], NULL) != 0)
-            return (1);
+            return (clean_mutex(data, i));
         i++;
     }
     return (0);
@@ -382,8 +403,7 @@ int main(int argc, char **argv)
     }
     else 
     {
-        free(data.philos);
-        free(data.forks);
+        clean_mutex(&data, data.philo_count);
         return (0);
     }
 }

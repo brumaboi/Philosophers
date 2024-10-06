@@ -12,73 +12,64 @@
 
 # include "../inc/philo.h"
 
-static void lock_forks(t_philo *philo, t_data *data)
+static int lock_forks(t_philo *philo, t_data *data)
 {
-    if (philo->left_fork < philo->right_fork)
+    int first_fork;
+    int second_fork;
+
+    if (philo->id % 2 == 0)
     {
-        pthread_mutex_lock(&data->forks[philo->left_fork]);
-        print_action(data, philo, "has taken a fork");
-        pthread_mutex_lock(&data->forks[philo->right_fork]);
-        print_action(data, philo, "has taken a fork");
-    }
-    else if (philo->left_fork > philo->right_fork)
-    {
-        pthread_mutex_lock(&data->forks[philo->right_fork]);
-        print_action(data, philo, "has taken a fork");
-        pthread_mutex_lock(&data->forks[philo->left_fork]);
-        print_action(data, philo, "has taken a fork");
+        first_fork = philo->left_fork;
+        second_fork = philo->right_fork;
     }
     else
     {
-        pthread_mutex_lock(&data->forks[philo->left_fork]);
-        print_action(data, philo, "has taken a fork");
-        if (one_dead(data))
+        first_fork = philo->right_fork;
+        second_fork = philo->left_fork;
+    }
+    while (1)
+    {
+        pthread_mutex_lock(&data->forks[first_fork]);
+        printf("Philosopher %d locked fork %d\n", philo->id, first_fork);
+        if (pthread_mutex_trylock(&data->forks[second_fork]) == 0)
         {
-            pthread_mutex_unlock(&data->forks[philo->left_fork]);
-            return ;
+            printf("Philosopher %d locked fork %d\n", philo->id, second_fork);
+            return (0);
         }
-        ft_usleep(100);
+        else
+        {
+            pthread_mutex_unlock(&data->forks[first_fork]);
+            ft_usleep(50);
+        }
+        if (one_dead(data))
+            return (1);
     }
 }
 
 static void unlock_forks(t_philo *philo, t_data *data)
 {
+    int first_fork;
+    int second_fork;
+
     if (philo->left_fork < philo->right_fork)
     {
-        pthread_mutex_unlock(&data->forks[philo->left_fork]);
-        pthread_mutex_unlock(&data->forks[philo->right_fork]);
-    }
-    else if (philo->left_fork > philo->right_fork)
-    {
-        pthread_mutex_unlock(&data->forks[philo->right_fork]);
-        pthread_mutex_unlock(&data->forks[philo->left_fork]);
+        first_fork = philo->left_fork;
+        second_fork = philo->right_fork;
     }
     else
     {
-        pthread_mutex_unlock(&data->forks[philo->left_fork]);
+        first_fork = philo->right_fork;
+        second_fork = philo->left_fork;
     }
-}
-
-static int give_forks_not_dead(t_philo *philo, t_data *data)
-{
-    lock_forks(philo, data);
-    pthread_mutex_lock(&philo->mutex);
-    will_starve(philo, data);
-    if(one_dead(data) == 1)
-    {
-        pthread_mutex_unlock(&philo->mutex);
-        unlock_forks(philo, data);
-        return (1);
-    }
-    pthread_mutex_unlock(&philo->mutex);
-    return (0);
+    pthread_mutex_unlock(&data->forks[second_fork]);
+    pthread_mutex_unlock(&data->forks[first_fork]);
 }
 
 static void ft_eat(t_philo *philo, t_data *data)
 {
-    if(one_dead(data) == 1)
+    if (one_dead(data))
         return ;
-    if (give_forks_not_dead(philo, data) == 1)
+    if (lock_forks(philo, data) == 1)
         return ;
     print_action(data, philo, "is eating");
     pthread_mutex_lock(&philo->mutex);
@@ -95,6 +86,7 @@ static void ft_eat(t_philo *philo, t_data *data)
         pthread_mutex_unlock(&data->full_mutex);
     }
     unlock_forks(philo, data);
+    ft_usleep(50);
 }
 
 void *routine(void *arg)

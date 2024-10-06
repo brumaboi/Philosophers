@@ -82,5 +82,3 @@ int init_philos(t_data *data)
     create_philos(data);
     return (0);
 }
-
-

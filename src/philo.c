@@ -24,11 +24,18 @@ void    ft_usleep(useconds_t usec)
 {
     long long start;
     long long end;
+    useconds_t time_left;
 
     start = ft_get_time();
     end = start + usec;
     while (ft_get_time() < end)
-        usleep(100);
+    {
+        time_left = end - ft_get_time();
+        if (time_left > 100)
+            usleep(100);
+        else
+            usleep(time_left);
+    }
 }
 
 int one_dead(t_data *data)
@@ -85,9 +92,11 @@ void lock_forks(t_philo *philo, t_data *data)
         pthread_mutex_lock(&data->forks[philo->left_fork]);
         print_action(data, philo, "has taken a fork");
         if (one_dead(data))
+        {
             pthread_mutex_unlock(&data->forks[philo->left_fork]);
-        else
-            ft_usleep(100);
+            return ;
+        }
+        ft_usleep(100);
     }
 }
 
@@ -139,7 +148,7 @@ void *routine(void *arg)
     data =  philo->data;
     if (philo->id % 2 == 0)
         ft_usleep(data->time_to_eat / 2);
-    while(one_dead(data) == 1)
+    while(one_dead(data) == 0)
     {
         print_action(data, philo, "is thinking");
         ft_eat(philo, data);
@@ -169,14 +178,17 @@ void set_death(t_data *data)
 
 int will_starve(t_philo *philo, t_data *data)
 {
+    pthread_mutex_lock(&philo->mutex);
     if (ft_get_time() - philo->last_meal > data->time_to_die)
     {
         set_death(data);
         pthread_mutex_lock(&data->print);
         printf("%lld %d died\n", ft_get_time() - data->start_time, philo->id + 1);
         pthread_mutex_unlock(&data->print);
+        pthread_mutex_unlock(&philo->mutex);
         return (1);
     }
+    pthread_mutex_unlock(&philo->mutex);
     return (0);
 }
 
@@ -223,8 +235,7 @@ void create_philos(t_data *data)
     i = 0;
     while (i < data->philo_count)
     {
-        if (pthread_join(data->philos[i].thread, NULL))
-            return (printf("Error: Thread join failed\n"));
+        pthread_join(data->philos[i].thread, NULL);
         i++;
     }
 }
@@ -317,8 +328,6 @@ int init_mutex(t_data *data)
         return (1);
     if (pthread_mutex_init(&data->full_mutex, NULL) != 0)
         return (1);
-    if (pthread_mutex_init(&data->ready_mutex, NULL) != 0)
-        return (1);
     while (i < data->philo_count)
     {
         if (pthread_mutex_init(&data->philos[i].mutex, NULL))
@@ -361,12 +370,20 @@ int main(int argc, char **argv)
 {
     t_data data;
 
-    // data = malloc(sizeof(t_data));
-    // if (!data)
-        // return (printf("Error: Malloc failed\n"), 1);
+    data.philos = NULL;
+    data.forks = NULL;
     if (check_parse_input(&data, argc, argv) == 1)
+    {
+        if (data.philos)
+            free(data.philos);
+        if(data.forks)
+            free(data.forks);
         return (1);
-    free(data.philos);
-    free(data.forks);
-    return(0);
+    }
+    else 
+    {
+        free(data.philos);
+        free(data.forks);
+        return (0);
+    }
 }

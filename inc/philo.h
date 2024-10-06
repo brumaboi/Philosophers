@@ -49,7 +49,6 @@ typedef struct s_data
     pthread_mutex_t print;
     pthread_mutex_t dead_mutex;
     pthread_mutex_t full_mutex;
-    pthread_mutex_t ready_mutex;
 } t_data;
 
 ////// FUNCTIONS //////

@@ -14,21 +14,23 @@
 
 int main(int argc, char **argv)
 {
-    t_data data;
+    t_data *data;
 
-    data.philos = NULL;
-    data.forks = NULL;
-    if (check_parse_input(&data, argc, argv) == 1)
+    data = malloc(sizeof(t_data));
+    if (!data)
+        return (1);
+    data->philos = NULL;
+    data->forks = NULL; 
+    if (check_parse_input(data, argc, argv) == 1)
     {
-        if (data.philos)
-            free(data.philos);
-        if(data.forks)
-            free(data.forks);
+        clean_mutex(data, data->philo_count);
+        free(data);
         return (1);
     }
     else 
     {
-        clean_mutex(&data, data.philo_count);
+        clean_mutex(data, data->philo_count);
+        free(data);
         return (0);
     }
 }

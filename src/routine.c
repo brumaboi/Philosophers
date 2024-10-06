@@ -12,21 +12,6 @@
 
 # include "../inc/philo.h"
 
-static int give_forks_not_dead(t_philo *philo, t_data *data)
-{
-    lock_forks(philo, data);
-    pthread_mutex_lock(&philo->mutex);
-    will_starve(philo, data);
-    if(one_dead(data) == 1)
-    {
-        pthread_mutex_unlock(&philo->mutex);
-        unlock_forks(philo, data);
-        return (1);
-    }
-    pthread_mutex_unlock(&philo->mutex);
-    return (0);
-}
-
 static void lock_forks(t_philo *philo, t_data *data)
 {
     if (philo->left_fork < philo->right_fork)
@@ -74,8 +59,25 @@ static void unlock_forks(t_philo *philo, t_data *data)
     }
 }
 
+static int give_forks_not_dead(t_philo *philo, t_data *data)
+{
+    lock_forks(philo, data);
+    pthread_mutex_lock(&philo->mutex);
+    will_starve(philo, data);
+    if(one_dead(data) == 1)
+    {
+        pthread_mutex_unlock(&philo->mutex);
+        unlock_forks(philo, data);
+        return (1);
+    }
+    pthread_mutex_unlock(&philo->mutex);
+    return (0);
+}
+
 static void ft_eat(t_philo *philo, t_data *data)
 {
+    if(one_dead(data) == 1)
+        return ;
     if (give_forks_not_dead(philo, data) == 1)
         return ;
     print_action(data, philo, "is eating");

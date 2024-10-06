@@ -40,6 +40,7 @@ static void check_philos(t_data *data)
 static void create_philos(t_data *data)
 {
     int i;
+    int j;
 
     i = 0;
     while (i < data->philo_count)
@@ -53,11 +54,11 @@ static void create_philos(t_data *data)
         i++;
     }
     check_philos(data);
-    i = 0;
-    while (i < data->philo_count)
+    j = 0;
+    while (j < i)
     {
-        pthread_join(data->philos[i].thread, NULL);
-        i++;
+        pthread_join(data->philos[j].thread, NULL);
+        j++;
     }
     clean_mutex(data, data->philo_count);
 }
@@ -74,6 +75,8 @@ int init_philos(t_data *data)
         data->philos[i].right_fork = (i + 1) % data->philo_count;
         data->philos[i].meals = 0;
         data->philos[i].last_meal = data->start_time;
+        data->philos[i].data = data;
+        pthread_mutex_init(&data->philos[i].mutex, NULL);
         i++;
     }
     create_philos(data);

@@ -22,6 +22,8 @@ static int parse_input(t_data *data, int argc, char **argv)
         data->meal_count = ft_atoi(argv[5]);
     else
         data->meal_count = -1;
+    data->death = 0;
+    data->full = 0;
     if (data->philo_count < 1 || data->time_to_die < 1 || data->time_to_eat < 1
         || data->time_to_sleep < 1 || (argc == 6 && data->meal_count < 1))
         return (printf("Error: Invalid argument\n"), 1);
@@ -32,7 +34,10 @@ static int parse_input(t_data *data, int argc, char **argv)
     if (!data->forks)
         return (printf("Error: Malloc failed\n"), 1);
     if (init_mutex(data) == 1)
+    {
+        clean_mutex(data, data->philo_count);
         return (printf("Error: Mutex init failed\n"), 1);
+    }
     data->start_time = ft_get_time();
     if (init_philos(data) == 1)
         return (printf("Error: Philo init failed\n"), 1);

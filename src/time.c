@@ -12,12 +12,12 @@
 
 # include "../inc/philo.h"
 
-long long ft_get_time(void)
+long long	ft_get_time(void)
 {
-    struct timeval time;
+	struct timeval	time;
 
-    gettimeofday(&time, NULL);
-    return ((time.tv_sec * 1000000) + time.tv_usec);
+	gettimeofday(&time, NULL);
+	return ((time.tv_sec * 1000) + (time.tv_usec / 1000));
 }
 
 void    ft_usleep(useconds_t usec)

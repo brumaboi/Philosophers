@@ -66,7 +66,7 @@ long long ft_get_time(void);
 void ft_usleep(useconds_t usec);
 void ft_sleep(t_philo *philo, t_data *data);
 //utils.c
-ft_atoi(const char *str);
+int ft_atoi(const char *str);
 void print_action(t_data *data, t_philo *philo, const char *str);
 int one_dead(t_data *data);
 void set_death(t_data *data);

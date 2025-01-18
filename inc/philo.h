@@ -63,7 +63,7 @@ int check_parse_input(t_data *data, int argc, char **argv);
 void *routine(void *arg);
 //time.c
 long long ft_get_time(void);
-void ft_usleep(useconds_t usec);
+void ft_usleep(useconds_t usec, t_data *data);
 void ft_sleep(t_philo *philo, t_data *data);
 //utils.c
 int ft_atoi(const char *str);

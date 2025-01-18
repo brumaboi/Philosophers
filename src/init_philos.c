@@ -33,7 +33,7 @@ static void check_philos(t_data *data)
             return ;
         }
         pthread_mutex_unlock(&data->full_mutex);
-        ft_usleep(100);
+        ft_usleep(100, data);
     }
 }
 

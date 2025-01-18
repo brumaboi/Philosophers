@@ -29,8 +29,14 @@ static int lock_forks(t_philo *philo, t_data *data)
     }
     while (1)
     {
+        if (one_dead(data))
+            return 1;
         pthread_mutex_lock(&data->forks[first_fork]);
-        printf("Philosopher %d locked fork %d\n", philo->id, first_fork);
+        if (one_dead(data)) // Recheck after locking first fork
+        {
+            pthread_mutex_unlock(&data->forks[first_fork]);
+            return (1);
+        }
         if (pthread_mutex_trylock(&data->forks[second_fork]) == 0)
         {
             printf("Philosopher %d locked fork %d\n", philo->id, second_fork);
@@ -39,10 +45,8 @@ static int lock_forks(t_philo *philo, t_data *data)
         else
         {
             pthread_mutex_unlock(&data->forks[first_fork]);
-            ft_usleep(50);
+            ft_usleep(50, data);
         }
-        if (one_dead(data))
-            return (1);
     }
 }
 
@@ -71,22 +75,22 @@ static void ft_eat(t_philo *philo, t_data *data)
         return ;
     if (lock_forks(philo, data) == 1)
         return ;
-    print_action(data, philo, "is eating");
     pthread_mutex_lock(&philo->mutex);
     philo->last_meal = ft_get_time();
     pthread_mutex_unlock(&philo->mutex);
-    ft_usleep(data->time_to_eat);
+    print_action(data, philo, "is eating");
+    ft_usleep(data->time_to_eat, data);
     pthread_mutex_lock(&philo->mutex);
     philo->meals++;
     pthread_mutex_unlock(&philo->mutex);
-    if (data->meal_count != -1 && philo->meals >= data->meal_count)
+    if (data->meal_count != -1 && philo->meals >= data->meal_count - 1)
     {
         pthread_mutex_lock(&data->full_mutex);
         data->full++;
         pthread_mutex_unlock(&data->full_mutex);
     }
     unlock_forks(philo, data);
-    ft_usleep(50);
+    ft_usleep(50, data);
 }
 
 void *routine(void *arg)
@@ -97,11 +101,13 @@ void *routine(void *arg)
     philo = (t_philo *)arg;
     data =  philo->data;
     if (philo->id % 2 == 0)
-        ft_usleep(data->time_to_eat / 2);
+        ft_usleep(data->time_to_eat / 2, data);
     while(one_dead(data) == 0)
     {
         print_action(data, philo, "is thinking");
         ft_eat(philo, data);
+        if (one_dead(data))
+            break;
         ft_sleep(philo, data);
     }
     return (NULL);

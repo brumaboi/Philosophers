@@ -32,7 +32,7 @@ static int lock_forks(t_philo *philo, t_data *data)
         if (one_dead(data))
             return 1;
         pthread_mutex_lock(&data->forks[first_fork]);
-        if (one_dead(data)) // Recheck after locking first fork
+        if (one_dead(data))
         {
             pthread_mutex_unlock(&data->forks[first_fork]);
             return (1);

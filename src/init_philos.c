@@ -16,12 +16,12 @@ static void check_philos(t_data *data)
 {
     int i;
 
-    while(1)
+    while (1)
     {
-        i = 0; 
+        i = 0;
         while (i < data->philo_count)
         {
-            if(will_starve(&data->philos[i], data) == 1)
+            if (will_starve(&data->philos[i], data) == 1)
                 return ;
             i++;
         }

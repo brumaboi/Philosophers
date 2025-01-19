@@ -20,7 +20,8 @@ int main(int argc, char **argv)
     if (!data)
         return (1);
     data->philos = NULL;
-    data->forks = NULL; 
+    data->forks = NULL;
+    data->cleaned_up = 0;
     if (check_parse_input(data, argc, argv) == 1)
     {
         clean_mutex(data, data->philo_count);

@@ -41,12 +41,8 @@ int ft_atoi(const char *str)
 void print_action(t_data *data, t_philo *philo, const char *str)
 {
     pthread_mutex_lock(&data->print);
-    if(one_dead(data) == 1)
-    {
-        pthread_mutex_unlock(&data->print);
-        return ;
-    }
-    printf("%lld %d %s\n", ft_get_time() - data->start_time, philo->id + 1, str);
+    if(one_dead(data) == 0)
+        printf("%lld %d %s\n", ft_get_time() - data->start_time, philo->id + 1, str);
     pthread_mutex_unlock(&data->print);
 }
 

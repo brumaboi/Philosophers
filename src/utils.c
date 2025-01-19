@@ -71,16 +71,18 @@ void set_death(t_data *data)
 
 int will_starve(t_philo *philo, t_data *data)
 {
+    long long time_since_last_meal;
+
     pthread_mutex_lock(&philo->mutex);
-    if (ft_get_time() - philo->last_meal > data->time_to_die)
+    time_since_last_meal = ft_get_time() - philo->last_meal;
+    pthread_mutex_unlock(&philo->mutex);
+    if (time_since_last_meal > data->time_to_die)
     {
         set_death(data);
         pthread_mutex_lock(&data->print);
         printf("%lld %d died\n", ft_get_time() - data->start_time, philo->id + 1);
         pthread_mutex_unlock(&data->print);
-        pthread_mutex_unlock(&philo->mutex);
         return (1);
     }
-    pthread_mutex_unlock(&philo->mutex);
     return (0);
 }

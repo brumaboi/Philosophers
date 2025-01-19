@@ -17,29 +17,30 @@ int clean_mutex(t_data *data, int i)
     int j;
 
     j = 0;
-    while (j < i)
+    if (data->philos)
     {
-        if (data->philos)
+        while (j < i)
+        {
             pthread_mutex_destroy(&data->philos[j].mutex);
-        if (data->forks)
-            pthread_mutex_destroy(&data->forks[j]);
-        j++;
-    }
-    if (data->philos)
-        pthread_mutex_destroy(&data->print);
-    if (data->forks)
-        pthread_mutex_destroy(&data->dead_mutex);
-    pthread_mutex_destroy(&data->full_mutex);
-    if (data->philos)
-    {
+            j++;
+        }
         free(data->philos);
         data->philos = NULL;
     }
+    j = 0;
     if (data->forks)
     {
+        while (j < i)
+        {
+            pthread_mutex_destroy(&data->forks[j]);
+            j++;
+        }
         free(data->forks);
         data->forks = NULL;
     }
+    pthread_mutex_destroy(&data->print);
+    pthread_mutex_destroy(&data->dead_mutex);
+    pthread_mutex_destroy(&data->full_mutex);
     return (1);
 }
 

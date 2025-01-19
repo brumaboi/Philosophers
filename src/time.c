@@ -36,7 +36,13 @@ void    ft_usleep(useconds_t usec, t_data *data)
         if (time_left > 100)
             usleep(100);
         else
-            usleep(time_left);
+        {
+            while (ft_get_time() < end)
+            {
+                if (one_dead(data))
+                    break;
+            }
+        }
     }
 }
 

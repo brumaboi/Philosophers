@@ -16,7 +16,7 @@ int clean_mutex(t_data *data, int i)
 {
     int j;
 
-    if (data->cleaned_up)
+    if (!data || data->cleaned_up)
         return (0);
     if (data->philos)
     {

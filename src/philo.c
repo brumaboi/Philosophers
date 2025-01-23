@@ -28,7 +28,7 @@ int main(int argc, char **argv)
         free(data);
         return (1);
     }
-    else 
+    else
     {
         clean_mutex(data, data->philo_count);
         free(data);

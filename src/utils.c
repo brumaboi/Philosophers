@@ -72,7 +72,7 @@ int will_starve(t_philo *philo, t_data *data)
     pthread_mutex_lock(&philo->mutex);
     time_since_last_meal = ft_get_time() - philo->last_meal;
     pthread_mutex_unlock(&philo->mutex);
-    if (time_since_last_meal > data->time_to_die)
+    if (time_since_last_meal >= data->time_to_die)
     {
         set_death(data);
         pthread_mutex_lock(&data->print);

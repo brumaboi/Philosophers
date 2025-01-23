@@ -34,15 +34,9 @@ void    ft_usleep(useconds_t usec, t_data *data)
             break;
         time_left = end - ft_get_time();
         if (time_left > 100)
-            usleep(100);
+            usleep(100 * 1000);
         else
-        {
-            while (ft_get_time() < end)
-            {
-                if (one_dead(data))
-                    break;
-            }
-        }
+            usleep(time_left * 1000);
     }
 }
 

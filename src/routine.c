@@ -17,7 +17,7 @@ static int lock_forks(t_philo *philo, t_data *data)
     int first_fork;
     int second_fork;
 
-    if (philo->id % 2 == 0)
+    if (philo->left_fork < philo->right_fork)
     {
         first_fork = philo->left_fork;
         second_fork = philo->right_fork;
@@ -27,27 +27,16 @@ static int lock_forks(t_philo *philo, t_data *data)
         first_fork = philo->right_fork;
         second_fork = philo->left_fork;
     }
-    while (1)
+    if (one_dead(data))
+        return 1;
+    pthread_mutex_lock(&data->forks[first_fork]);
+    if (one_dead(data))
     {
-        if (one_dead(data))
-            return 1;
-        pthread_mutex_lock(&data->forks[first_fork]);
-        if (one_dead(data))
-        {
-            pthread_mutex_unlock(&data->forks[first_fork]);
-            return (1);
-        }
-        if (pthread_mutex_trylock(&data->forks[second_fork]) == 0)
-        {
-            printf("Philosopher %d locked fork %d\n", philo->id, second_fork);
-            return (0);
-        }
-        else
-        {
-            pthread_mutex_unlock(&data->forks[first_fork]);
-            ft_usleep(50, data);
-        }
+        pthread_mutex_unlock(&data->forks[first_fork]);
+        return (1);
     }
+    pthread_mutex_lock(&data->forks[second_fork]);
+    return (0);
 }
 
 static void unlock_forks(t_philo *philo, t_data *data)
@@ -83,14 +72,14 @@ static void ft_eat(t_philo *philo, t_data *data)
     pthread_mutex_lock(&philo->mutex);
     philo->meals++;
     pthread_mutex_unlock(&philo->mutex);
-    if (data->meal_count != -1 && philo->meals >= data->meal_count - 1)
+
+    if (data->meal_count != -1 && philo->meals >= data->meal_count)
     {
         pthread_mutex_lock(&data->full_mutex);
         data->full++;
         pthread_mutex_unlock(&data->full_mutex);
     }
     unlock_forks(philo, data);
-    ft_usleep(50, data);
 }
 
 void *routine(void *arg)
@@ -100,6 +89,9 @@ void *routine(void *arg)
 
     philo = (t_philo *)arg;
     data =  philo->data;
+    pthread_mutex_lock(&philo->mutex);
+    philo->last_meal = ft_get_time();
+    pthread_mutex_unlock(&philo->mutex);
     if (philo->id % 2 == 0)
         ft_usleep(data->time_to_eat / 2, data);
     while(one_dead(data) == 0)

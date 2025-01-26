@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "../inc/philo.h"
+#include "../inc/philo.h"
 
 static void	check_philos(t_data *data)
 {
@@ -45,7 +45,8 @@ static void	create_philos(t_data *data)
 	i = 0;
 	while (i < data->philo_count)
 	{
-		if (pthread_create(&data->philos[i].thread, NULL, routine, &data->philos[i]))
+		if (pthread_create(&data->philos[i].thread,
+				NULL, routine, &data->philos[i]))
 		{
 			set_death(data);
 			clean_mutex(data, i);
@@ -75,7 +76,7 @@ int	init_philos(t_data *data)
 		data->philos[i].left_fork = i;
 		data->philos[i].right_fork = (i + 1) % data->philo_count;
 		data->philos[i].meals = 0;
-		data->philos[i].last_meal = 0; 
+		data->philos[i].last_meal = 0;
 		data->philos[i].data = data;
 		pthread_mutex_init(&data->philos[i].mutex, NULL);
 		i++;

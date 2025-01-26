@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "../inc/philo.h"
+#include "../inc/philo.h"
 
 long long	ft_get_time(void)
 {
@@ -20,18 +20,18 @@ long long	ft_get_time(void)
 	return ((time.tv_sec * 1000) + (time.tv_usec / 1000));
 }
 
-void    ft_usleep(useconds_t usec, t_data *data)
+void	ft_usleep(useconds_t usec, t_data *data)
 {
 	long long	start;
 	long long	end;
-	useconds_t time_left;
+	useconds_t	time_left;
 
 	start = ft_get_time();
 	end = start + usec;
 	while (ft_get_time() < end)
 	{
 		if (one_dead(data))
-			break;
+			break ;
 		time_left = end - ft_get_time();
 		if (time_left > 100)
 			usleep(100 * 1000);
@@ -40,7 +40,7 @@ void    ft_usleep(useconds_t usec, t_data *data)
 	}
 }
 
-void ft_sleep(t_philo *philo, t_data *data)
+void	ft_sleep(t_philo *philo, t_data *data)
 {
 	print_action(data, philo, "is sleeping");
 	ft_usleep(data->time_to_sleep, data);

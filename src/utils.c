@@ -10,13 +10,13 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "../inc/philo.h"
+#include "../inc/philo.h"
 
 int	ft_atoi(const char *str)
 {
-	int i;
-	int sign;
-	long nbr;
+	int		i;
+	int		sign;
+	long	nbr;
 
 	i = 0;
 	sign = 1;
@@ -41,8 +41,9 @@ int	ft_atoi(const char *str)
 void	print_action(t_data *data, t_philo *philo, const char *str)
 {
 	pthread_mutex_lock(&data->print);
-	if(one_dead(data) == 0)
-		printf("%lld %d %s\n", ft_get_time() - data->start_time, philo->id + 1, str);
+	if (one_dead(data) == 0)
+		printf("%lld %d %s\n",
+			ft_get_time() - data->start_time, philo->id + 1, str);
 	pthread_mutex_unlock(&data->print);
 }
 
@@ -76,7 +77,8 @@ int	will_starve(t_philo *philo, t_data *data)
 	{
 		set_death(data);
 		pthread_mutex_lock(&data->print);
-		printf("%lld %d died\n", ft_get_time() - data->start_time, philo->id + 1);
+		printf("%lld %d died\n",
+			ft_get_time() - data->start_time, philo->id + 1);
 		pthread_mutex_unlock(&data->print);
 		return (1);
 	}

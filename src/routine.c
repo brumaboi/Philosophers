@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "../inc/philo.h"
+#include "../inc/philo.h"
 
 static int	lock_forks(t_philo *philo, t_data *data)
 {
@@ -28,7 +28,7 @@ static int	lock_forks(t_philo *philo, t_data *data)
 		second_fork = philo->left_fork;
 	}
 	if (one_dead(data))
-		return 1;
+		return (1);
 	pthread_mutex_lock(&data->forks[first_fork]);
 	if (one_dead(data))
 	{
@@ -72,7 +72,6 @@ static void	ft_eat(t_philo *philo, t_data *data)
 	pthread_mutex_lock(&philo->mutex);
 	philo->meals++;
 	pthread_mutex_unlock(&philo->mutex);
-
 	if (data->meal_count != -1 && philo->meals >= data->meal_count)
 	{
 		pthread_mutex_lock(&data->full_mutex);
@@ -88,18 +87,18 @@ void	*routine(void *arg)
 	t_data	*data;
 
 	philo = (t_philo *)arg;
-	data =  philo->data;
+	data = philo->data;
 	pthread_mutex_lock(&philo->mutex);
 	philo->last_meal = ft_get_time();
 	pthread_mutex_unlock(&philo->mutex);
 	if (philo->id % 2 == 0)
 		ft_usleep(data->time_to_eat / 2, data);
-	while(one_dead(data) == 0)
+	while (one_dead(data) == 0)
 	{
 		print_action(data, philo, "is thinking");
 		ft_eat(philo, data);
 		if (one_dead(data))
-			break;
+			break ;
 		ft_sleep(philo, data);
 	}
 	return (NULL);

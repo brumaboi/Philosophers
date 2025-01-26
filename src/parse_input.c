@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "../inc/philo.h"
+#include "../inc/philo.h"
 
 static int	parse_input(t_data *data, int argc, char **argv)
 {
@@ -52,7 +52,7 @@ static int	check_input(int argc, char **argv)
 	if (argc < 5 || argc > 6)
 		return (printf("Error: Wrong number of arguments\n"), 1);
 	i = 1;
-	while(i < argc)
+	while (i < argc)
 	{
 		j = 0;
 		while (argv[i][j] != '\0')

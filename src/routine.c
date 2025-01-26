@@ -72,7 +72,7 @@ static void	ft_eat(t_philo *philo, t_data *data)
 	pthread_mutex_lock(&philo->mutex);
 	philo->meals++;
 	pthread_mutex_unlock(&philo->mutex);
-	if (data->meal_count != -1 && philo->meals >= data->meal_count)
+	if (data->meal_count != -1 && philo->meals == data->meal_count)
 	{
 		pthread_mutex_lock(&data->full_mutex);
 		data->full++;

@@ -12,6 +12,17 @@
 
 #include "../inc/philo.h"
 
+static int	allocate_arrs(t_data *data)
+{
+	data->philos = malloc(sizeof(t_philo) * data->philo_count);
+	if (!data->philos)
+		return (printf("Error: Malloc failed\n"), 1);
+	data->forks = malloc(sizeof(pthread_mutex_t) * data->philo_count);
+	if (!data->forks)
+		return (printf("Error: Malloc failed\n"), 1);
+	return (0);
+}
+
 static int	parse_input(t_data *data, int argc, char **argv)
 {
 	data->philo_count = ft_atoi(argv[1]);
@@ -27,12 +38,8 @@ static int	parse_input(t_data *data, int argc, char **argv)
 	if (data->philo_count < 1 || data->time_to_die < 1 || data->time_to_eat < 1
 		|| data->time_to_sleep < 1 || (argc == 6 && data->meal_count < 1))
 		return (printf("Error: Invalid argument\n"), 1);
-	data->philos = malloc(sizeof(t_philo) * data->philo_count);
-	if (!data->philos)
-		return (printf("Error: Malloc failed\n"), 1);
-	data->forks = malloc(sizeof(pthread_mutex_t) * data->philo_count);
-	if (!data->forks)
-		return (printf("Error: Malloc failed\n"), 1);
+	if (allocate_arrs(data) == 1)
+		return (1);
 	if (init_mutex(data) == 1)
 	{
 		clean_mutex(data, data->philo_count);

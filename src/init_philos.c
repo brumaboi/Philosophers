@@ -12,74 +12,74 @@
 
 # include "../inc/philo.h"
 
-static void check_philos(t_data *data)
+static void	check_philos(t_data *data)
 {
-    int i;
+	int	i;
 
-    while (1)
-    {
-        i = 0;
-        while (i < data->philo_count)
-        {
-            if (will_starve(&data->philos[i], data) == 1)
-                return ;
-            i++;
-        }
-        pthread_mutex_lock(&data->full_mutex);
-        if (data->full == data->philo_count)
-        {
-            set_death(data);
-            pthread_mutex_unlock(&data->full_mutex);
-            return ;
-        }
-        pthread_mutex_unlock(&data->full_mutex);
-        ft_usleep(50, data);
-    }
+	while (1)
+	{
+		i = 0;
+		while (i < data->philo_count)
+		{
+			if (will_starve(&data->philos[i], data) == 1)
+				return ;
+			i++;
+		}
+		pthread_mutex_lock(&data->full_mutex);
+		if (data->full == data->philo_count)
+		{
+			set_death(data);
+			pthread_mutex_unlock(&data->full_mutex);
+			return ;
+		}
+		pthread_mutex_unlock(&data->full_mutex);
+		ft_usleep(50, data);
+	}
 }
 
-static void create_philos(t_data *data)
+static void	create_philos(t_data *data)
 {
-    int i;
-    int j;
+	int	i;
+	int	j;
 
-    i = 0;
-    while (i < data->philo_count)
-    {
-        if (pthread_create(&data->philos[i].thread, NULL, routine, &data->philos[i]))
-        {
-            set_death(data);
-            clean_mutex(data, i);
-            break ;
-        }
-        i++;
-    }
-    ft_usleep(1, data);
-    check_philos(data);
-    j = 0;
-    while (j < i)
-    {
-        pthread_join(data->philos[j].thread, NULL);
-        j++;
-    }
-    clean_mutex(data, data->philo_count);
+	i = 0;
+	while (i < data->philo_count)
+	{
+		if (pthread_create(&data->philos[i].thread, NULL, routine, &data->philos[i]))
+		{
+			set_death(data);
+			clean_mutex(data, i);
+			break ;
+		}
+		i++;
+	}
+	ft_usleep(1, data);
+	check_philos(data);
+	j = 0;
+	while (j < i)
+	{
+		pthread_join(data->philos[j].thread, NULL);
+		j++;
+	}
+	clean_mutex(data, data->philo_count);
 }
 
-int init_philos(t_data *data)
+int	init_philos(t_data *data)
 {
-    int i;
+	int	i;
 
-    i = 0;
-    while (i < data->philo_count)
-    {
-        data->philos[i].id = i;
-        data->philos[i].left_fork = i;
-        data->philos[i].right_fork = (i + 1) % data->philo_count;
-        data->philos[i].meals = 0;
-        data->philos[i].last_meal = 0; 
-        data->philos[i].data = data;
-        pthread_mutex_init(&data->philos[i].mutex, NULL);
-        i++;
-    }
-    create_philos(data);
-    return (0);
+	i = 0;
+	while (i < data->philo_count)
+	{
+		data->philos[i].id = i;
+		data->philos[i].left_fork = i;
+		data->philos[i].right_fork = (i + 1) % data->philo_count;
+		data->philos[i].meals = 0;
+		data->philos[i].last_meal = 0; 
+		data->philos[i].data = data;
+		pthread_mutex_init(&data->philos[i].mutex, NULL);
+		i++;
+	}
+	create_philos(data);
+	return (0);
 }

@@ -12,26 +12,26 @@
 
 # include "../inc/philo.h"
 
-int main(int argc, char **argv)
+int	main(int argc, char **argv)
 {
-    t_data *data;
+	t_data	*data;
 
-    data = malloc(sizeof(t_data));
-    if (!data)
-        return (1);
-    data->philos = NULL;
-    data->forks = NULL;
-    data->cleaned_up = 0;
-    if (check_parse_input(data, argc, argv) == 1)
-    {
-        clean_mutex(data, data->philo_count);
-        free(data);
-        return (1);
-    }
-    else
-    {
-        clean_mutex(data, data->philo_count);
-        free(data);
-        return (0);
-    }
+	data = malloc(sizeof(t_data));
+	if (!data)
+		return (1);
+	data->philos = NULL;
+	data->forks = NULL;
+	data->cleaned_up = 0;
+	if (check_parse_input(data, argc, argv) == 1)
+	{
+		clean_mutex(data, data->philo_count);
+		free(data);
+		return (1);
+	}
+	else
+	{
+		clean_mutex(data, data->philo_count);
+		free(data);
+		return (0);
+	}
 }

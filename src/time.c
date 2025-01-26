@@ -22,26 +22,26 @@ long long	ft_get_time(void)
 
 void    ft_usleep(useconds_t usec, t_data *data)
 {
-    long long start;
-    long long end;
-    useconds_t time_left;
+	long long	start;
+	long long	end;
+	useconds_t time_left;
 
-    start = ft_get_time();
-    end = start + usec;
-    while (ft_get_time() < end)
-    {
-        if (one_dead(data))
-            break;
-        time_left = end - ft_get_time();
-        if (time_left > 100)
-            usleep(100 * 1000);
-        else
-            usleep(time_left * 1000);
-    }
+	start = ft_get_time();
+	end = start + usec;
+	while (ft_get_time() < end)
+	{
+		if (one_dead(data))
+			break;
+		time_left = end - ft_get_time();
+		if (time_left > 100)
+			usleep(100 * 1000);
+		else
+			usleep(time_left * 1000);
+	}
 }
 
 void ft_sleep(t_philo *philo, t_data *data)
 {
-    print_action(data, philo, "is sleeping");
-    ft_usleep(data->time_to_sleep, data);
+	print_action(data, philo, "is sleeping");
+	ft_usleep(data->time_to_sleep, data);
 }

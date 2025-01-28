@@ -17,6 +17,8 @@ static int	lock_forks(t_philo *philo, t_data *data)
 	int	first_fork;
 	int	second_fork;
 
+	if (philo->left_fork == philo->right_fork)
+		return (ft_usleep(data->time_to_die, data), 1);
 	if (philo->left_fork < philo->right_fork)
 	{
 		first_fork = philo->left_fork;

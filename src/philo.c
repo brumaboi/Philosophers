@@ -24,7 +24,8 @@ int	main(int argc, char **argv)
 	data->cleaned_up = 0;
 	if (check_parse_input(data, argc, argv) == 1)
 	{
-		clean_mutex(data, data->philo_count);
+		if (data->cleaned_up)
+			clean_mutex(data, data->philo_count);
 		free(data);
 		return (1);
 	}

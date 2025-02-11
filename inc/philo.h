@@ -50,6 +50,7 @@ typedef struct s_data
 	pthread_mutex_t	dead_mutex;
 	pthread_mutex_t	full_mutex;
 	int				cleaned_up;
+	pthread_t		monitor_thread;
 }	t_data;
 
 ////// FUNCTIONS //////

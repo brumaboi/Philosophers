@@ -24,19 +24,16 @@ void	ft_usleep(useconds_t usec, t_data *data)
 {
 	long long	start;
 	long long	end;
-	useconds_t	time_left;
+	long long	now;
 
 	start = ft_get_time();
 	end = start + usec;
-	while (ft_get_time() < end)
+	while (!one_dead(data))
 	{
-		if (one_dead(data))
+		now = ft_get_time();
+		if (now >= end)
 			break ;
-		time_left = end - ft_get_time();
-		if (time_left > 100)
-			usleep(100 * 1000);
-		else
-			usleep(time_left * 1000);
+		usleep(200);
 	}
 }
 

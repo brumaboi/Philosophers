@@ -12,9 +12,10 @@
 
 #include "../inc/philo.h"
 
-static void	check_philos(t_data *data)
+static void	*monitor_routine(void *arg)
 {
-	int	i;
+	t_data	*data = (t_data *)arg;
+	int		i;
 
 	while (1)
 	{
@@ -22,7 +23,7 @@ static void	check_philos(t_data *data)
 		while (i < data->philo_count)
 		{
 			if (will_starve(&data->philos[i], data) == 1)
-				return ;
+				return (NULL);
 			i++;
 		}
 		pthread_mutex_lock(&data->full_mutex);
@@ -30,11 +31,12 @@ static void	check_philos(t_data *data)
 		{
 			set_death(data);
 			pthread_mutex_unlock(&data->full_mutex);
-			return ;
+			return (NULL);
 		}
 		pthread_mutex_unlock(&data->full_mutex);
 		ft_usleep(50, data);
 	}
+	return (NULL);
 }
 
 static void	create_philos(t_data *data)
@@ -55,13 +57,19 @@ static void	create_philos(t_data *data)
 		i++;
 	}
 	ft_usleep(1, data);
-	check_philos(data);
+	if (pthread_create(&data->monitor_thread, NULL, monitor_routine, data))
+	{
+		set_death(data);
+		clean_mutex(data, i);
+		return ;
+	}
 	j = 0;
 	while (j < i)
 	{
 		pthread_join(data->philos[j].thread, NULL);
 		j++;
 	}
+	pthread_join(data->monitor_thread, NULL);
 	clean_mutex(data, data->philo_count);
 }
 
@@ -76,9 +84,8 @@ int	init_philos(t_data *data)
 		data->philos[i].left_fork = i;
 		data->philos[i].right_fork = (i + 1) % data->philo_count;
 		data->philos[i].meals = 0;
-		data->philos[i].last_meal = 0;
+		data->philos[i].last_meal = data->start_time;
 		data->philos[i].data = data;
-		pthread_mutex_init(&data->philos[i].mutex, NULL);
 		i++;
 	}
 	create_philos(data);

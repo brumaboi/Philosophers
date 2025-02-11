@@ -90,16 +90,18 @@ void	*routine(void *arg)
 
 	philo = (t_philo *)arg;
 	data = philo->data;
+	if (data->philo_count % 2 == 0 && (philo->id % 2 == 0))
+		ft_usleep(data->time_to_eat / 2, data);
+	else if (data->philo_count % 2 == 1 && (philo->id % 2 == 0))
+		usleep(1000);
 	pthread_mutex_lock(&philo->mutex);
 	philo->last_meal = ft_get_time();
 	pthread_mutex_unlock(&philo->mutex);
-	if (philo->id % 2 == 0)
-		ft_usleep(data->time_to_eat / 2, data);
 	while (one_dead(data) == 0)
 	{
 		print_action(data, philo, "is thinking");
 		ft_eat(philo, data);
-		if (one_dead(data))
+		if (one_dead(data) || data->philo_count == 1)
 			break ;
 		ft_sleep(philo, data);
 	}

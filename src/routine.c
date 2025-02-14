@@ -32,12 +32,11 @@ static int	lock_forks(t_philo *philo, t_data *data)
 	if (one_dead(data))
 		return (1);
 	pthread_mutex_lock(&data->forks[first_fork]);
+	print_action(data, philo, "has taken a fork");
 	if (one_dead(data))
-	{
-		pthread_mutex_unlock(&data->forks[first_fork]);
-		return (1);
-	}
+		return (pthread_mutex_unlock(&data->forks[first_fork]), 1);
 	pthread_mutex_lock(&data->forks[second_fork]);
+	print_action(data, philo, "has taken a fork");
 	return (0);
 }
 
@@ -90,6 +89,7 @@ void	*routine(void *arg)
 
 	philo = (t_philo *)arg;
 	data = philo->data;
+	print_action(data, philo, "is thinking");
 	if (data->philo_count % 2 == 0 && (philo->id % 2 == 0))
 		ft_usleep(data->time_to_eat / 2, data);
 	else if (data->philo_count % 2 == 1 && (philo->id % 2 == 0))
@@ -99,11 +99,11 @@ void	*routine(void *arg)
 	pthread_mutex_unlock(&philo->mutex);
 	while (one_dead(data) == 0)
 	{
-		print_action(data, philo, "is thinking");
 		ft_eat(philo, data);
 		if (one_dead(data) || data->philo_count == 1)
 			break ;
 		ft_sleep(philo, data);
+		print_action(data, philo, "is thinking");
 	}
 	return (NULL);
 }

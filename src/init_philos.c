@@ -39,6 +39,17 @@ static void	*monitor_routine(void *arg)
 	return (NULL);
 }
 
+static int	create_monitor(t_data *data, int i)
+{
+	if (pthread_create(&data->monitor_thread, NULL, monitor_routine, data))
+	{
+		set_death(data);
+		clean_mutex(data, i);
+		return (1);
+	}
+	return (0);
+}
+
 static void	create_philos(t_data *data)
 {
 	int	i;
@@ -57,18 +68,11 @@ static void	create_philos(t_data *data)
 		i++;
 	}
 	ft_usleep(1, data);
-	if (pthread_create(&data->monitor_thread, NULL, monitor_routine, data))
-	{
-		set_death(data);
-		clean_mutex(data, i);
+	if (create_monitor(data, i) == 1)
 		return ;
-	}
 	j = 0;
 	while (j < i)
-	{
-		pthread_join(data->philos[j].thread, NULL);
-		j++;
-	}
+		pthread_join(data->philos[j++].thread, NULL);
 	pthread_join(data->monitor_thread, NULL);
 	clean_mutex(data, data->philo_count);
 }
